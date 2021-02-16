@@ -168,9 +168,6 @@ function corenlp(serverURL::String, input::String)::Dict{String,Any}
 
     res=HTTP.post(url, [], input)
     body = "{"*split(String(res), "\n{")[end]
-    open("body.txt", "w") do file 
-        print(file,body)
-    end
     annotations = split(body, "\n")
     key,value,numLinesOfValue = parseDict(annotations)
     @assert key == "" && numLinesOfValue > 0

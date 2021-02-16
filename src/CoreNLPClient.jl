@@ -4,10 +4,15 @@ using HTTP
 
 function parseStringProperty(input::SubString{String})::Tuple{String,String,Int}
     result = ("","",0)
-    stringPropertyMatch = match(r"^[ \t]*\"(.)+\"[ \t]*:[ \t]*\"(.)*\"", input)
+    stringPropertyMatch = match(r"^[ \t]*\"(.)+\"[ \t]*:[ \t]*\"(.|[:])*\"", input)
     if stringPropertyMatch !== nothing
-        key = split(split(stringPropertyMatch.match, ":")[1], "\"")[2]
-        value = split(split(stringPropertyMatch.match, ":")[2], "\"")[2]
+        splits = split(stringPropertyMatch.match, ":")
+        key = split(splits[1], "\"")[2]
+        value = splits[2]
+        for i = 3:length(splits)
+            value = value * ":" * splits[i]
+        end
+        value = split(value, "\"")[2]
         result = (key,value,1)
     end
     result
@@ -22,6 +27,23 @@ function parseFloatProperty(input::SubString{String})::Tuple{String,Float64,Int}
         result = (key,value,1)
     end
     result 
+end
+
+function parseIntIntervalProperty(input::SubString{String})::Tuple{String,Vector{Int},Int}
+    result = ("",[0,0],0)
+    IntIntervalPropertyMatch = match(r"^[ \t]*\"(.)+\"[ \t]*:[ \t]*\[[ \t]*(-)?(\d)+[ \t]*,[ \t]*(-)?(\d)+[ \t]*\]", input)
+    if IntIntervalPropertyMatch !== nothing
+        splits = split(IntIntervalPropertyMatch.match, ":")
+        key = split(splits[1], "\"")[2]
+        values = Int[]
+        matches = eachmatch(r"(-)?(\d)+", splits[2])
+        for m in matches
+            push!(values, parse(Int, m.match))
+        end
+        @assert length(values) == 2
+        result = (key,values,1)
+    end
+    result
 end
 
 function parseIntProperty(input::SubString{String})::Tuple{String,Int,Int}
@@ -77,11 +99,13 @@ function parseDict(input::Vector{SubString{String}})::Tuple{String,Dict{String,A
     if openMatch === nothing
         return ("",Dict{String,Any}(), 0) 
     end
+    #println("Dict $(input[1]) starts:")
 
     n = length(input)
     i = 2
     closeMatch = nothing
     while i <= n
+        #println(input[i])
         key,value,numLinesOfValue = parseStringProperty(input[i])
         if numLinesOfValue > 0
             result[key] = value
@@ -95,6 +119,12 @@ function parseDict(input::Vector{SubString{String}})::Tuple{String,Dict{String,A
             continue 
         end
         key,value,numLinesOfValue = parseIntProperty(input[i])
+        if numLinesOfValue > 0
+            result[key] = value
+            i += numLinesOfValue
+            continue 
+        end
+        key,value,numLinesOfValue = parseIntIntervalProperty(input[i])
         if numLinesOfValue > 0
             result[key] = value
             i += numLinesOfValue
@@ -118,6 +148,7 @@ function parseDict(input::Vector{SubString{String}})::Tuple{String,Dict{String,A
             break 
         end
     end
+    #println("Dict $(input[1]) ends.")
     @assert closeMatch !== nothing
     (myKey,result,i-1)
 end
@@ -125,6 +156,9 @@ end
 function coreNLP(serverURL::String, input::String)::Dict{String,Any}
     res=HTTP.post(serverURL, [], input)
     body = "{"*split(String(res), "\n{")[end]
+    open("body.txt", "w") do file 
+        print(file,body)
+    end
     annotations = split(body, "\n")
     key,value,numLinesOfValue = parseDict(annotations)
     @assert key == "" && numLinesOfValue > 0

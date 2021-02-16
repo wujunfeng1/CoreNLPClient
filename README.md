@@ -12,4 +12,11 @@ $/opt/jdk-11.0.10+9/bin/java -mx4g -cp "/opt/stanford-corenlp-4.2.0/*" edu.stanf
 Using this package is simple. For example:
 
 using CoreNLPClient
+
+corenlp("http://localhost:9000", "I am a Julia programmer. I love Julia programming.")
+
+corenlp("localhost:9000", "I am a Julia programmer. I love Julia programming.")
+
+corenlp("localhost", "I am a Julia programmer. I love Julia programming.")
+
 corenlp("I am a Julia programmer. I love Julia programming.")

@@ -2,6 +2,8 @@ module CoreNLPClient
 
 using HTTP
 
+export corenlp 
+
 function parseStringProperty(input::SubString{String})::Tuple{String,String,Int}
     result = ("","",0)
     stringPropertyMatch = match(r"^[ \t]*\"(.)+\"[ \t]*:[ \t]*\"(.|[:])*\"", input)
@@ -153,8 +155,18 @@ function parseDict(input::Vector{SubString{String}})::Tuple{String,Dict{String,A
     (myKey,result,i-1)
 end
 
-function coreNLP(serverURL::String, input::String)::Dict{String,Any}
-    res=HTTP.post(serverURL, [], input)
+function corenlp(serverURL::String, input::String)::Dict{String,Any}
+    url = serverURL
+    if !startswith(url, "http://")
+        url = "http://" * url 
+    end
+    splits = split(url, ":")
+    @assert length(splits) <= 3
+    if length(splits) < 3
+        url = url * ":9000"
+    end
+
+    res=HTTP.post(url, [], input)
     body = "{"*split(String(res), "\n{")[end]
     open("body.txt", "w") do file 
         print(file,body)
@@ -163,6 +175,10 @@ function coreNLP(serverURL::String, input::String)::Dict{String,Any}
     key,value,numLinesOfValue = parseDict(annotations)
     @assert key == "" && numLinesOfValue > 0
     value
+end
+
+function corenlp(input::String)::Dict{String,Any}
+    corenlp("http://localhost:9000", input)
 end
 
 end # module

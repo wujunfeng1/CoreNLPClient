@@ -7,7 +7,7 @@ https://stanfordnlp.github.io/CoreNLP/
 ### Quick Start
 This package can be installed in julia by:
 ```
-using Pkg; Pkg.add("CoreNLPClient")   
+using Pkg;Pkg.add(PackageSpec(url="https://github.com/wujunfeng1/CoreNLPClient"))   
 ```
 
 The server must be started whenever the package is used. The detail of starting the server could be found on webpage:

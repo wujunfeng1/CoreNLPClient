@@ -8,6 +8,4 @@ res3 = CoreNLP("localhost", "I am a Julia programmer. I love Julia programming."
 
 res4 = CoreNLP("I am a Julia programmer. I love Julia programming.")
 
-anno1 = getNLPAnnotations(res1)
-
-anno2 = getNLPAnnotations(res2)
+annotations = getNLPAnnotations("I am a Julia programmer. I love Julia programming.")

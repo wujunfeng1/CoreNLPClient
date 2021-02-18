@@ -2,7 +2,7 @@ module CoreNLPClient
 
 using HTTP
 
-export CoreNLP, TNLPAnnotation, getNLPAnnotations 
+export CoreNLP, NLPAnnotation, getNLPAnnotations 
 
 # ===========================================================================================
 # function parseStringProperty
@@ -283,7 +283,7 @@ end
 #               description of governors. This field is a vector of the indices of the
 #               dependents in a sentence.
 #   depLabels: One label for each dependent to describe the type of dependency.
-struct TNLPAnnotation
+struct NLPAnnotation
     token::String 
     POS::String 
     governors::Vector{Int}
@@ -302,7 +302,7 @@ end
 # note:
 #   (1) By default, we use localhost:9000 as the URL of CoreNLP. If a customized URL needs to
 #       be set, we could use the "CORENLP_URL" environment variable to specify the URL.  
-function getNLPAnnotations(text::String)::Vector{Vector{TNLPAnnotation}}
+function getNLPAnnotations(text::String)::Vector{Vector{NLPAnnotation}}
     # ---------------------------------------------------------------------------------------
     # step 1: Fetch CoreNLP server URL from environment variables.
     coreNLPUrl = ""
@@ -320,10 +320,10 @@ function getNLPAnnotations(text::String)::Vector{Vector{TNLPAnnotation}}
 
     # ---------------------------------------------------------------------------------------
     # step 3: Iterate through the annotated result to fill the output sentence by sentence.
-    output = Vector{TNLPAnnotation}[]
+    output = Vector{NLPAnnotation}[]
     for sentence in nlpResult["sentences"]
         # (3.1) create a vector for the annotations of a sentence
-        annotationOfSentence = TNLPAnnotation[]
+        annotationOfSentence = NLPAnnotation[]
 
         # (3.2) get tokens and dependencies from the CoreNLP annotations of this sentence 
         tokens = sentence["tokens"]
@@ -331,7 +331,7 @@ function getNLPAnnotations(text::String)::Vector{Vector{TNLPAnnotation}}
 
         # (3.3) add the tokens to the vector of annotations 
         for token in tokens 
-            annotationOfToken = TNLPAnnotation(token["word"], token["pos"], Int[], Int[], String[])
+            annotationOfToken = NLPAnnotation(token["word"], token["pos"], Int[], Int[], String[])
             push!(annotationOfSentence, annotationOfToken)
         end
 

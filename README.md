@@ -23,15 +23,15 @@ Examples of using this package:
 ```
 using CoreNLPClient
 
-res1 = CoreNLP("http://localhost:9000", "I am a Julia programmer. I love Julia programming.")
+text = "I am a Julia programmer. I love Julia programming."
 
-res2 = CoreNLP("localhost:9000", "I am a Julia programmer. I love Julia programming.")
+res1 = CoreNLP("http://localhost:9000", text)
 
-res3 = CoreNLP("localhost", "I am a Julia programmer. I love Julia programming.")
+res2 = CoreNLP("localhost:9000", text)
 
-res4 = CoreNLP("I am a Julia programmer. I love Julia programming.")
+res3 = CoreNLP("localhost", text)
 
-anno1 = getNLPAnnotations(res1)
+res4 = CoreNLP(text)
 
-anno2 = getNLPAnnotations(res2)
+annotations = getNLPAnnotations(text)
 ```
